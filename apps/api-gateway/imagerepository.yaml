@@ -1,0 +1,8 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: api-gateway
+  namespace: flux-system
+spec:
+  image: ghcr.io/team-mercurious/api-gateway
+  interval: 1m0s
