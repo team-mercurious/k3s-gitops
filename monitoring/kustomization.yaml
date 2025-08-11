@@ -4,3 +4,5 @@ kind: Kustomization
 resources:
 - grafana-ingress.yaml
 - prometheus-ingress.yaml
+- prometheus-auth-secret.yaml
+- prometheus-auth-middleware.yaml
