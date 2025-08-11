@@ -47,14 +47,22 @@ Documentation complète de l'infrastructure Kubernetes et du système de déploi
 | Document | Description |
 |----------|-------------|
 | [**Monitoring et Opérations**](./operations/monitoring.md) | Monitoring, debugging et opérations courantes ⭐ |
+| [**Accès Interfaces Monitoring**](./monitoring-access.md) | Guide d'accès sécurisé Prometheus/Grafana 🔐 |
 
 ## 🚀 Services déployés
 
+### Applications
 | Service | URL | Type | Statut |
 |---------|-----|------|--------|
 | **API Gateway** | https://api2.gotravelyzer.com | Public REST | ✅ Automatisé |
 | **API Enrichment** | Interne uniquement | Kafka Consumer | ✅ Automatisé |
 | **API Generation** | Interne uniquement | Kafka Consumer | ✅ Automatisé |
+
+### Monitoring Sécurisé 🔐
+| Interface | URL | Authentification | Statut |
+|-----------|-----|------------------|--------|
+| **Prometheus** | https://prometheus.gotravelyzer.com | Basic Auth (backlight/QR4xQ7QL5ppPhp) | ✅ SSL |
+| **Grafana** | https://grafana.gotravelyzer.com | Grafana Login | ✅ SSL |
 
 ### Architecture de communication
 
