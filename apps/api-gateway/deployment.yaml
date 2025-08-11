@@ -25,27 +25,10 @@ spec:
         - containerPort: 3000
           protocol: TCP
         env:
-        # App configuration
-        - name: CLIENT_DEV_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gateway-config
-              key: CLIENT_DEV_URL
-        - name: CLIENT_FRONT_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gateway-config
-              key: CLIENT_FRONT_URL
-        - name: CLIENT_PLANNER_URL
-          valueFrom:
-            configMapKeyRef:
-              name: gateway-config
-              key: CLIENT_PLANNER_URL
-        - name: NODE_ENV
-          valueFrom:
-            configMapKeyRef:
-              name: gateway-config
-              key: NODE_ENV
+        # App configuration - Using secrets instead of configmap
+        envFrom:
+        - secretRef:
+            name: api-gateway-env
         
         # Database and Redis
         - name: MONGO_URI

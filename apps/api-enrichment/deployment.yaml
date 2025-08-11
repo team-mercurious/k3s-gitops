@@ -112,6 +112,8 @@ spec:
         envFrom:
         - secretRef:
             name: app-common-secrets
+        - secretRef:
+            name: api-enrichment-env
         
         # Health checks désactivés - microservice Kafka pur
         # livenessProbe:

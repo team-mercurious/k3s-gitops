@@ -5,6 +5,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - hpa.yaml
+  - env-secret.yaml
 
 namespace: app
 

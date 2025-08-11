@@ -6,3 +6,4 @@ resources:
 - service.yaml
 - imagerepository.yaml
 - imagepolicy.yaml
+- env-secret.yaml
