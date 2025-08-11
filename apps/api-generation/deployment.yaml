@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-generation
+  namespace: app
+  labels:
+    app: api-generation
+    version: v1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-generation
+  template:
+    metadata:
+      labels:
+        app: api-generation
+        version: v1.0.0
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/team-mercurious/api-generation:latest # {"$imagepolicy": "flux-system:api-generation:tag"}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        # Kafka configuration (comprehensive like api-gateway)
+        - name: KAFKA_BROKERS
+          value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+        - name: KAFKA_BROKER
+          value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
+        - name: KAFKA_SASL_MECHANISM
+          value: "scram-sha-512"
+        - name: KAFKA_MECHANISM
+          value: "scram-sha-512"
+        - name: KAFKA_SECURITY_PROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: securityProtocol
+        - name: KAFKA_SASL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: username
+        - name: KAFKA_SASL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: password
+        - name: KAFKA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: username
+        - name: KAFKA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: password
+        - name: KAFKA_SASL_ENABLED
+          value: "true"
+        - name: KAFKA_SSL
+          value: "false"
+        - name: KAFKAJS_NO_PARTITIONER_WARNING
+          value: "1"
+        - name: KAFKA_GROUP_ID
+          value: "generation-consumers"
+        - name: KAFKA_CLIENT_ID
+          value: "generation-service"
+        # Retry et timeout configuration
+        - name: KAFKA_RETRY_INITIAL_RETRY_TIME
+          value: "100"
+        - name: KAFKA_RETRY_RETRIES
+          value: "8"
+        - name: KAFKA_CONNECTION_TIMEOUT
+          value: "30000"
+        - name: KAFKA_REQUEST_TIMEOUT
+          value: "30000"
+        
+        # Additional env vars from configmap
+        - name: SECURITYPROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: securityProtocol
+        - name: BROKERS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: brokers
+        - name: MECHANISM
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-config
+              key: mechanism
+        - name: USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: username
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: kafka-sasl
+              key: password
+        
+        # Common app secrets
+        envFrom:
+        - secretRef:
+            name: app-common-secrets
+        
+        # Health checks désactivés - microservice Kafka pur
+        # livenessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 3000
+        #   initialDelaySeconds: 120
+        #   periodSeconds: 30
+        #   timeoutSeconds: 10
+        #   failureThreshold: 5
+        # readinessProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 3000
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 15
+        #   timeoutSeconds: 10
+        #   failureThreshold: 5
+        # startupProbe:
+        #   httpGet:
+        #     path: /health
+        #     port: 3000
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+        #   timeoutSeconds: 5
+        #   failureThreshold: 60
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      
+      restartPolicy: Always

@@ -28,5 +28,5 @@ spec:
     push:
       branch: main
   update:
-    path: "./k3s-gitops"
+    path: "./"
     strategy: Setters

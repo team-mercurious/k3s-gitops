@@ -1,0 +1,95 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: auto-deploy
+  namespace: app
+spec:
+  schedule: "*/2 * * * *"  # Toutes les 2 minutes (plus réactif)
+  successfulJobsHistoryLimit: 1  # Garde seulement 1 job réussi
+  failedJobsHistoryLimit: 2      # Garde seulement 2 jobs échoués  
+  concurrencyPolicy: Forbid      # Empêche plusieurs jobs simultanés
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: auto-deploy-sa
+          containers:
+          - name: auto-deploy
+            image: bitnami/kubectl:latest
+            imagePullPolicy: Always
+            resources:
+              requests:
+                memory: "32Mi"
+                cpu: "10m"
+              limits:
+                memory: "64Mi"
+                cpu: "50m"
+            command:
+            - /bin/bash
+            - -c
+            - |
+              # Vérification optimisée - ne log que si changements détectés
+              changes_detected=false
+              
+              update_deployment() {
+                  local service=$1
+                  local namespace="app"
+                  
+                  # Récupération optimisée en une seule commande kubectl
+                  current_image=$(kubectl get deployment $service -n $namespace -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
+                  latest_image=$(kubectl get imagepolicy $service -n flux-system -o jsonpath='{.status.latestImage}' 2>/dev/null)
+                  
+                  # Ne déploie QUE si l'image a vraiment changé
+                  if [ "$current_image" != "$latest_image" ] && [ -n "$latest_image" ] && [ "$latest_image" != "null" ]; then
+                      echo "🚀 NOUVELLE IMAGE détectée pour $service:"
+                      echo "   Remplace: $current_image"  
+                      echo "   Par:      $latest_image"
+                      
+                      kubectl patch deployment $service -n $namespace -p "{\"spec\":{\"template\":{\"spec\":{\"containers\":[{\"name\":\"app\",\"image\":\"$latest_image\"}]}}}}"
+                      echo "✅ $service déployé avec succès!"
+                      changes_detected=true
+                  fi
+              }
+              
+              update_deployment "api-gateway"
+              update_deployment "api-enrichment" 
+              update_deployment "api-generation"
+              
+              # Ne log que si des changements ont été détectés
+              if [ "$changes_detected" = false ]; then
+                  echo "$(date): Aucun changement détecté - services à jour"
+              else
+                  echo "🎉 Déploiements terminés à $(date)"
+              fi
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: auto-deploy-sa
+  namespace: app
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: auto-deploy-role
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list", "patch"]
+- apiGroups: ["image.toolkit.fluxcd.io"]
+  resources: ["imagepolicies"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: auto-deploy-binding
+subjects:
+- kind: ServiceAccount
+  name: auto-deploy-sa
+  namespace: app
+roleRef:
+  kind: ClusterRole
+  name: auto-deploy-role
+  apiGroup: rbac.authorization.k8s.io
