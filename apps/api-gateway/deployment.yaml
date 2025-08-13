@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: ghcr.io/team-mercurious/api-gateway:latest # {"$imagepolicy": "flux-system:api-gateway:tag"}
+        image: sha-1628d43795b90a9161b19e692255bc64cf5b8232 # {"$imagepolicy": "flux-system:api-gateway:tag"}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -29,7 +29,6 @@ spec:
         envFrom:
         - secretRef:
             name: api-gateway-env
-        
         # Database and Redis
         - name: MONGO_URI
           valueFrom:
@@ -46,7 +45,6 @@ spec:
             secretKeyRef:
               name: app-common-secrets
               key: REDIS_URL
-        
         # API Keys
         - name: OPENAI_API_KEY
           valueFrom:
@@ -58,7 +56,6 @@ spec:
             secretKeyRef:
               name: app-common-secrets
               key: GOOGLE_PLACES_API_KEY
-        
         # OAuth secrets
         - name: GOOGLE_CLIENT_ID
           valueFrom:
@@ -78,7 +75,6 @@ spec:
               name: gateway-oauth-secrets
               key: OPENWEATHER_API_KEY
               optional: true
-        
         # Auth secret
         - name: BETTER_AUTH_SECRET
           valueFrom:
@@ -86,7 +82,6 @@ spec:
               name: gateway-auth-secret
               key: BETTER_AUTH_SECRET
               optional: true
-        
         # Kafka configuration
         - name: KAFKA_BROKERS
           value: "my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092"
@@ -129,7 +124,6 @@ spec:
           value: "false"
         - name: KAFKAJS_NO_PARTITIONER_WARNING
           value: "1"
-        
         # Additional env vars from configmap
         - name: SECURITYPROTOCOL
           valueFrom:
@@ -156,7 +150,6 @@ spec:
             secretKeyRef:
               name: kafka-sasl
               key: password
-        
         # Health checks
         livenessProbe:
           httpGet:
@@ -182,7 +175,6 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 3
           failureThreshold: 30
-        
         # Resource limits
         resources:
           requests:
@@ -191,5 +183,4 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-      
       restartPolicy: Always

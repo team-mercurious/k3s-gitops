@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: ghcr.io/team-mercurious/api-enrichment:latest # {"$imagepolicy": "flux-system:api-enrichment:tag"}
+        image: sha-4ebd834a0d29de45e1564f8074f05e6003de1d98 # {"$imagepolicy": "flux-system:api-enrichment:tag"}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -80,7 +80,6 @@ spec:
           value: "30000"
         - name: KAFKA_REQUEST_TIMEOUT
           value: "30000"
-        
         # Additional env vars from configmap
         - name: SECURITYPROTOCOL
           valueFrom:
@@ -107,14 +106,12 @@ spec:
             secretKeyRef:
               name: kafka-sasl
               key: password
-        
         # Common app secrets
         envFrom:
         - secretRef:
             name: app-common-secrets
         - secretRef:
             name: api-enrichment-env
-        
         # Health checks désactivés - microservice Kafka pur
         # livenessProbe:
         #   httpGet:
@@ -140,7 +137,7 @@ spec:
         #   periodSeconds: 10
         #   timeoutSeconds: 5
         #   failureThreshold: 60
-        
+
         # Resource limits
         resources:
           requests:
@@ -149,5 +146,4 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-      
       restartPolicy: Always
