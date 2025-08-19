@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: app
-        image: sha-2c06b098f894bb72efe535dce2e989088fceaf0e # {"$imagepolicy": "flux-system:api-generation:tag"}
+        image: sha-eb9c7d2555a23106ad72991f8ce943316134a03e # {"$imagepolicy": "flux-system:api-generation:tag"}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
